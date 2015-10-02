@@ -1,0 +1,12 @@
+email:
+   from:
+     name: John Ableton
+     email: john@ableton.com
+   to:
+     name: Susan Brockles
+     email: susan@brockles.com
+sites:
+   - name: openssl
+     url: https://www.openssl.org/source/
+   - name: nginx
+     url: http://nginx.org/en/download.html
