@@ -14,7 +14,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 setup(
    name='hasItChanged',
 
-   version='0.0.1',
+   version='0.0.2',
 
    description='Monitor websites for changes',
    long_description=long_description,
@@ -52,7 +52,7 @@ setup(
 
    entry_points={
       'console_scripts': [
-         'hasItChanged = hasItChanged:main',
+         'hasItChanged = hasItChanged.__main__:main',
       ],
    },
 )
