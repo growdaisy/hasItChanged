@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 import requests, yaml, os, difflib
-from pysend import Contact, Email
-from pysend.sendgridWebApi import SendgridWebApiServer
+from pysend import Contact, Email, sendgridWebApi
 
 def send(subject, html):
    email = Email(sender, [receiver], subject, html)
@@ -51,7 +50,7 @@ def main():
    sender = Contact(senderInfo['name'], senderInfo['email'])
    receiverInfo = config['email']['to']
    receiver = Contact(receiverInfo['name'], receiverInfo['email'])
-   server = SendgridWebApiServer(sendgridUrl, sendgridApiKey)
+   server = sendgridWebApi.Server(sendgridUrl, sendgridApiKey)
    server.init()
 
    # Iterate through sites in config and send emails
