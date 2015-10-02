@@ -14,7 +14,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 setup(
    name='hasItChanged',
 
-   version='0.0.3',
+   version='0.0.4',
 
    description='Monitor websites for changes',
    long_description=long_description,
@@ -48,7 +48,7 @@ setup(
    packages=find_packages(exclude=['contrib', 'docs', 'tests*',
                                    'examples']),
 
-   install_requires=['requests', 'pyyaml'],
+   install_requires=['requests', 'pyyaml', 'pysend'],
 
    entry_points={
       'console_scripts': [
