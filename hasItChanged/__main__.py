@@ -3,12 +3,14 @@
 import requests, yaml, os, difflib
 from pysend import Contact, Email, sendgridWebApi
 
-def send(subject, html):
-   email = Email(sender, [receiver], subject, html)
-   server.send(email)
+# Get config from environment
+configPath = os.environ['HAS_IT_CHANGED_CFG']
+dataPath = os.environ['HAS_IT_CHANGED_DATA']
+sendgridApiKey = os.environ['SENDGRID_API_KEY']
+sendgridUrl = os.environ['SENDGRID_URL']
 
 # Check for site diff and email diff if it has changed
-def maybeEmail(name, url):
+def maybeEmail(server, sender, receiver, name, url):
    prevPath = os.path.join(dataPath, '{}.html'.format(name))
    prev = ''
    if os.path.lexists(prevPath):
@@ -20,30 +22,22 @@ def maybeEmail(name, url):
    r = requests.get(url)
    curr = r.text
    if curr != prev:
-      diff = html_diff.make_file(prev.split('\n'),
-               curr.split('\n'), 'previous', 'current', True, 5)
-      print('{} changed; sending email'.format(name))
-      send('[hasItChaned] {} changed'.format(name), diff)
+      if prev == '':
+         print('[{}] Storing initial version'.format(name))
+      else:
+         html_diff = difflib.HtmlDiff()
+         diff = html_diff.make_file(prev.split('\n'),
+                  curr.split('\n'), 'previous', 'current', True, 5)
+         print('[{}] Change detected; sending email'.format(name))
+         email = Email(sender, [receiver],
+                       '[hasItChanged] {} changed', diff)
+         server.send(email)
       with open(prevPath, 'w') as f:
          f.write(curr)
 
 def main():
-   # Get config from environment
-   configPath = os.environ['HAS_IT_CHANGED_CFG']
-   dataPath = os.environ['HAS_IT_CHANGED_DATA']
-   emailProvider = os.environ['HAS_IT_CHANGED_EMAIL_PROVIDER']
-   sendgridApiKey = os.environ['SENDGRID_API_KEY']
-   sendgridUrl = os.environ['SENDGRID_URL']
-
-   # Check that user is using supported email provider
-   if emailProvider != "sendGridWebApi":
-      raise "Unsupported email provider"
-
    # Yaml configuration
    config = yaml.load(open(configPath, 'rU').read())
-
-   # Create diff context
-   html_diff = difflib.HtmlDiff()
 
    # Sends message to configured receiver
    senderInfo = config['email']['from']
@@ -51,12 +45,12 @@ def main():
    receiverInfo = config['email']['to']
    receiver = Contact(receiverInfo['name'], receiverInfo['email'])
    server = sendgridWebApi.Server(sendgridUrl, sendgridApiKey)
-   server.init()
+   server.connect()
 
    # Iterate through sites in config and send emails
    for site in config['sites']:
-      maybeEmail(site['name'], site['url'])
-
+      maybeEmail(server, sender, receiver, site['name'],
+            site['url'])
 
 if __name__ == "__main__":
    main()

@@ -14,7 +14,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 setup(
    name='hasItChanged',
 
-   version='0.0.4',
+   version='0.0.5',
 
    description='Monitor websites for changes',
    long_description=long_description,
