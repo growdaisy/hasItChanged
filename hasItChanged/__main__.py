@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
-import requests, yaml, os, difflib
+import requests, yaml, os, difflib, lxml.html, re
 from pysend import Contact, Email, sendgridWebApi
+from lxml.cssselect import CSSSelector
 
 # Get config from environment
 configPath = os.environ['HAS_IT_CHANGED_CFG']
@@ -9,18 +10,26 @@ dataPath = os.environ['HAS_IT_CHANGED_DATA']
 sendgridApiKey = os.environ['SENDGRID_API_KEY']
 sendgridUrl = os.environ['SENDGRID_URL']
 
+def deleteCR(string):
+    return re.sub(r'\r$', '', string, flags=re.MULTILINE)
+
 # Check for site diff and email diff if it has changed
-def maybeEmail(server, sender, receiver, name, url):
+def maybeEmail(server, sender, receiver, name, url, selector):
    prevPath = os.path.join(dataPath, '{}.html'.format(name))
    prev = ''
    if os.path.lexists(prevPath):
       if os.path.isfile(prevPath):
-         with open(prevPath, 'rU') as f:
+         with open(prevPath, 'r') as f:
             prev = f.read()
       else:
          raise 'Bad path {}'.format(prevPath)
    r = requests.get(url)
-   curr = r.text
+   curr = deleteCR(r.text)
+   if selector:
+      tree = lxml.html.fromstring(curr)
+      sel = CSSSelector('.showtimes-theater')
+      results = sel(tree)
+      curr = lxml.html.tostring(results[0], encoding='UTF-8').decode()
    if curr != prev:
       if prev == '':
          print('[{}] Storing initial version'.format(name))
@@ -49,8 +58,9 @@ def main():
 
    # Iterate through sites in config and send emails
    for site in config['sites']:
+      selector = site['selector'] if 'selector' in site else None
       maybeEmail(server, sender, receiver, site['name'],
-            site['url'])
+                 site['url'], selector)
 
 if __name__ == "__main__":
    main()
