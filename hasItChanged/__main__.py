@@ -30,7 +30,7 @@ def maybeEmail(server, sender, receiver, name, url):
                   curr.split('\n'), 'previous', 'current', True, 5)
          print('[{}] Change detected; sending email'.format(name))
          email = Email(sender, [receiver],
-                       '[hasItChanged] {} changed', diff)
+                       '[hasItChanged] {} changed'.format(name), diff)
          server.send(email)
       with open(prevPath, 'w') as f:
          f.write(curr)
