@@ -27,7 +27,7 @@ def maybeEmail(server, sender, receiver, name, url, selector):
    curr = deleteCR(r.text)
    if selector:
       tree = lxml.html.fromstring(curr)
-      sel = CSSSelector('.showtimes-theater')
+      sel = CSSSelector(selector)
       results = sel(tree)
       curr = lxml.html.tostring(results[0], encoding='UTF-8').decode()
    if curr != prev:
